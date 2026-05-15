@@ -1,0 +1,137 @@
+{
+  "name": "opencode-diff-viewer",
+  "displayName": "OpenCode Diff Viewer",
+  "description": "Track and visualise code changes made by OpenCode, with diff viewer and revert support.",
+  "version": "0.1.0",
+  "publisher": "opencode",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "opencode-diff-viewer",
+          "title": "OpenCode Edits",
+          "icon": "$(git-compare)"
+        }
+      ]
+    },
+    "views": {
+      "opencode-diff-viewer": [
+        {
+          "id": "opencode-diff-viewer.editsPanel",
+          "name": "Edit History",
+          "icon": "$(git-compare)",
+          "contextualTitle": "OpenCode Edits"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "opencode-diff-viewer.viewDiff",
+        "title": "View Diff",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "opencode-diff-viewer.revertFile",
+        "title": "Revert File",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "opencode-diff-viewer.revertSession",
+        "title": "Revert All Changes",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "opencode-diff-viewer.deleteSession",
+        "title": "Delete Session",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "opencode-diff-viewer.clearAll",
+        "title": "Clear All History",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "opencode-diff-viewer.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "opencode-diff-viewer.clearAll",
+          "when": "view == opencode-diff-viewer.editsPanel",
+          "group": "navigation@2"
+        },
+        {
+          "command": "opencode-diff-viewer.refresh",
+          "when": "view == opencode-diff-viewer.editsPanel",
+          "group": "navigation@1"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "opencode-diff-viewer.revertSession",
+          "when": "view == opencode-diff-viewer.editsPanel && viewItem == editSession",
+          "group": "inline@1"
+        },
+        {
+          "command": "opencode-diff-viewer.deleteSession",
+          "when": "view == opencode-diff-viewer.editsPanel && (viewItem == editSession || viewItem == editSession-reverted)",
+          "group": "inline@2"
+        },
+        {
+          "command": "opencode-diff-viewer.revertFile",
+          "when": "view == opencode-diff-viewer.editsPanel && viewItem == fileChange",
+          "group": "inline@1"
+        },
+        {
+          "command": "opencode-diff-viewer.viewDiff",
+          "when": "view == opencode-diff-viewer.editsPanel && (viewItem == fileChange || viewItem == fileChange-reverted)",
+          "group": "inline@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "OpenCode Diff Viewer",
+      "properties": {
+        "opencode-diff-viewer.port": {
+          "type": "number",
+          "default": 19877,
+          "description": "HTTP port for receiving edit notifications from the OpenCode plugin."
+        },
+        "opencode-diff-viewer.maxSessionHistory": {
+          "type": "number",
+          "default": 50,
+          "description": "Maximum number of edit sessions to keep in history."
+        },
+        "opencode-diff-viewer.autoExpandLatest": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically expand the latest edit session in the panel."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "npx @vscode/vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.100.0",
+    "typescript": "^5.5.0"
+  }
+}
