@@ -32,7 +32,24 @@ the edit session with full before/after content for offline diffs.
 
 ## Installation
 
-### OpenCode Plugin
+### Quick install (recommended)
+
+Download and run the installer from the latest release:
+
+```bash
+curl -fsSL https://github.com/ivan-valdes/opencode-diff-viewer/releases/download/v0.1.0-beta/install.sh | bash
+```
+
+Or download the [full pack](https://github.com/ivan-valdes/opencode-diff-viewer/releases/download/v0.1.0-beta/opencode-diff-viewer-0.1.0-beta.tar.gz), extract, and run:
+
+```bash
+tar xzf opencode-diff-viewer-0.1.0-beta.tar.gz
+./install.sh
+```
+
+### Manual install
+
+#### OpenCode Plugin
 
 ```bash
 cp opencode-plugin/opencode-diff-viewer.ts ~/.config/opencode/plugins/
@@ -46,7 +63,7 @@ Then add the plugin to your `opencode.json` (if not auto-detected):
 }
 ```
 
-### VS Code Extension
+#### VS Code Extension
 
 Build and install the VSIX:
 
@@ -56,6 +73,12 @@ npm install
 npm run compile
 npx @vscode/vsce package
 code --install-extension opencode-diff-viewer-*.vsix
+```
+
+Or install the pre-built VSIX from the [release](https://github.com/ivan-valdes/opencode-diff-viewer/releases/tag/v0.1.0-beta):
+
+```bash
+code --install-extension opencode-diff-viewer-0.1.0.vsix
 ```
 
 ## Configuration (VS Code)
