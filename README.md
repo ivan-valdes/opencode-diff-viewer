@@ -1,5 +1,7 @@
 # opencode-diff-viewer
 
+> **Beta** - This project is under active development. Expect breaking changes and incomplete features.
+
 Track and visualise every code change that [OpenCode](https://opencode.ai) makes, right inside VS Code.
 
 ## How it works
