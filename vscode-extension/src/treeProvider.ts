@@ -1,11 +1,27 @@
 import * as vscode from "vscode";
+import * as path from "path";
 import type { EditSessionMeta, FileEntryMeta } from "./types";
 import type { StorageManager } from "./storage";
-import { DiffContentProvider } from "./diffProvider";
 
 // ─── Tree element union ───
 
-export type TreeElement = EditSessionItem | FileChangeItem;
+export type TreeElement = WorkspaceGroupItem | EditSessionItem | FileChangeItem;
+
+// ─── Workspace group (top-level when showing all workspaces) ───
+
+export class WorkspaceGroupItem extends vscode.TreeItem {
+  constructor(
+    public readonly workspacePath: string,
+    public readonly sessions: EditSessionMeta[]
+  ) {
+    const name = path.basename(workspacePath);
+    super(name, vscode.TreeItemCollapsibleState.Expanded);
+    this.description = `${sessions.length} session${sessions.length !== 1 ? "s" : ""}`;
+    this.tooltip = workspacePath;
+    this.contextValue = "workspaceGroup";
+    this.iconPath = new vscode.ThemeIcon("folder");
+  }
+}
 
 // ─── Edit session (root-level node) ───
 
@@ -87,10 +103,20 @@ export class EditTreeDataProvider
 
   private storage: StorageManager;
   private autoExpandLatest: boolean;
+  private _showAllWorkspaces = false;
 
   constructor(storage: StorageManager, autoExpandLatest: boolean) {
     this.storage = storage;
     this.autoExpandLatest = autoExpandLatest;
+  }
+
+  get showAllWorkspaces(): boolean {
+    return this._showAllWorkspaces;
+  }
+
+  setShowAllWorkspaces(value: boolean): void {
+    this._showAllWorkspaces = value;
+    this.refresh();
   }
 
   refresh(): void {
@@ -107,14 +133,48 @@ export class EditTreeDataProvider
 
   getChildren(element?: TreeElement): TreeElement[] {
     if (!element) {
-      // Root: list sessions
       const index = this.storage.getIndex();
-      return index.map((session, i) => {
+
+      if (this._showAllWorkspaces) {
+        // Group sessions by workspace path
+        const groups = new Map<string, EditSessionMeta[]>();
+        for (const session of index) {
+          const wp = session.workspacePath;
+          if (!groups.has(wp)) {
+            groups.set(wp, []);
+          }
+          groups.get(wp)!.push(session);
+        }
+        // Return workspace group nodes sorted by most recent session
+        return Array.from(groups.entries())
+          .sort((a, b) => {
+            const latestA = a[1][0]?.timestamp ?? 0;
+            const latestB = b[1][0]?.timestamp ?? 0;
+            return latestB - latestA;
+          })
+          .map(([wp, sessions]) => new WorkspaceGroupItem(wp, sessions));
+      }
+
+      // Default: filter to current workspace only
+      const folders = vscode.workspace.workspaceFolders ?? [];
+      const folderPaths = new Set(folders.map((f) => f.uri.fsPath));
+
+      const filtered = index.filter((session) => folderPaths.has(session.workspacePath));
+
+      return filtered.map((session, i) => {
         const item = new EditSessionItem(session);
-        // Auto-expand latest session
         if (i === 0 && this.autoExpandLatest) {
-          item.collapsibleState =
-            vscode.TreeItemCollapsibleState.Expanded;
+          item.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+        }
+        return item;
+      });
+    }
+
+    if (element instanceof WorkspaceGroupItem) {
+      return element.sessions.map((session, i) => {
+        const item = new EditSessionItem(session);
+        if (i === 0 && this.autoExpandLatest) {
+          item.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
         }
         return item;
       });

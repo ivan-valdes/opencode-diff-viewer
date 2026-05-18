@@ -8,7 +8,7 @@ import type {
 } from "./types";
 import { StorageManager } from "./storage";
 import { DiffContentProvider } from "./diffProvider";
-import { EditTreeDataProvider, EditSessionItem, FileChangeItem } from "./treeProvider";
+import { EditTreeDataProvider, EditSessionItem, FileChangeItem, WorkspaceGroupItem } from "./treeProvider";
 import {
   revertFileWithConfirm,
   revertSessionWithConfirm,
@@ -154,6 +154,29 @@ export async function activate(
         await storage.loadIndex();
         treeProvider.refresh();
         updateBadge();
+      }
+    )
+  );
+
+  // ─── Toggle show all workspaces ───
+  // Set initial context for the toggle button icon
+  vscode.commands.executeCommand(
+    "setContext",
+    "opencode-diff-viewer.showAllWorkspaces",
+    false
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "opencode-diff-viewer.toggleAllWorkspaces",
+      () => {
+        const newValue = !treeProvider.showAllWorkspaces;
+        treeProvider.setShowAllWorkspaces(newValue);
+        vscode.commands.executeCommand(
+          "setContext",
+          "opencode-diff-viewer.showAllWorkspaces",
+          newValue
+        );
       }
     )
   );

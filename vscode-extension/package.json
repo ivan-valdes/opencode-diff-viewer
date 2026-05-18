@@ -65,10 +65,25 @@
         "command": "opencode-diff-viewer.refresh",
         "title": "Refresh",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "opencode-diff-viewer.toggleAllWorkspaces",
+        "title": "Show All Workspaces",
+        "icon": "$(folder-library)"
       }
     ],
     "menus": {
       "view/title": [
+        {
+          "command": "opencode-diff-viewer.toggleAllWorkspaces",
+          "when": "view == opencode-diff-viewer.editsPanel && !opencode-diff-viewer.showAllWorkspaces",
+          "group": "navigation@0"
+        },
+        {
+          "command": "opencode-diff-viewer.toggleAllWorkspaces",
+          "when": "view == opencode-diff-viewer.editsPanel && opencode-diff-viewer.showAllWorkspaces",
+          "group": "navigation@0"
+        },
         {
           "command": "opencode-diff-viewer.clearAll",
           "when": "view == opencode-diff-viewer.editsPanel",
